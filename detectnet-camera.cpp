@@ -38,12 +38,14 @@
 #include <string.h>
 #include <wiringSerial.h>
 
+#include <iostream>
+#include <fstream>  
 
 #define DEFAULT_CAMERA 1//-1	// -1 for onboard camera, or change to index of /dev/video V4L2 camera (>=0)	
 		
 //char serialPortFilename[] = "/dev/ttyACM0";//////////////////////////////
 
-
+using namespace std;
 
 bool signal_recieved = false;
 
@@ -59,6 +61,14 @@ void sig_handler(int signo)
 //int fd = serialOpen ("/dev/ttyACM0", 9600);
 int main( int argc, char** argv )
 {
+//ofstream myfile;
+ //myfile.open ("vio.txt");
+
+ofstream myfile;
+myfile.open ("/home/nvidia/Desktop/vio.txt");
+
+
+
 //////////////////////////////////////////////////
 /*
  serialib LS;                                                            // Object of the serialib class
@@ -134,6 +144,21 @@ if (fd < 0)
 	fwrite(writeBuffer, 1, 1, serPort);
 */
 ////////////////////////////////////////
+
+	int midFaceY;
+	int midFaceX;
+	
+	int tiltChannel = 0;
+
+	
+	int servoTiltPosition  = 90;
+
+	int panChannel = 1;
+
+	int servoPanPosition = 90;
+
+
+
 
 	printf("detectnet-camera\n  args (%i):  ", argc);
 
@@ -290,8 +315,10 @@ if (fd < 0)
 				const int nc = confCPU[n*2+1];
 				float* bb = bbCPU + (n * 4);
 				
+				
+
 				//printf("bounding box %i   (%f, %f)  (%f, %f)  w=%f  h=%f\n", n, bb[0], bb[1], bb[2], bb[3], bb[2] - bb[0], bb[3] - bb[1]); 
-				/*
+				
 				midFaceY= (bb[3] - bb[1])/2;
 				midFaceX= (bb[2] - bb[0])/2;
 
@@ -326,6 +353,13 @@ if (fd < 0)
 						servoPanPosition=servoPanPosition+1;
 					}
 				}
+
+				myfile << "0.\n";
+				myfile << "servoTiltPosition.\n";
+				myfile << "1.\n";
+				myfile << "servoPanPosition.\n";
+ // myfile.open ("example.txt");
+/*
 				writeBuffer[0]=tiltChannel;
 				fwrite(writeBuffer, 1, 1, serPort);
 				printf("tiltChannel = %i", writeBuffer[0]);
@@ -342,7 +376,6 @@ if (fd < 0)
 				fwrite(writeBuffer, 1, 1, serPort);
 				printf("servoPanPosition = %i", writeBuffer[0]);
 */
-
 				if( nc != lastClass || n == (numBoundingBoxes - 1) )
 				{
 					if( !net->DrawBoxes((float*)imgRGBA, (float*)imgRGBA, camera->GetWidth(), camera->GetHeight(), 
